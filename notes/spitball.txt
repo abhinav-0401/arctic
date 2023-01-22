@@ -1,0 +1,3 @@
+=> A program is a set of declarations followed by a compund statement.
+
+=> isNumber checks if the character is a digit, then peeks to see the next characters that are digits. Once it encounters a character that is not a digit, it stops peeking and then the entirety of the peeked digits become an Int token
