@@ -25,8 +25,8 @@ function runFile(filename: string): void {
   const lexer = new Lexer(src);
   const tokens: Token[] = lexer.lex(src);
 
-  console.log(tokens);
-  // Lexer.printTokens(tokens);
+  // console.log(tokens);
+  Lexer.printTokens(tokens);
 }
 
 // function repl() {

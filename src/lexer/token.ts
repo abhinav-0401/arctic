@@ -67,6 +67,6 @@ export class Token {
   }
 
   toString(): string {
-    return `[TokenType: ${this.type}, Literal: ${this.literal}]`;
+    return `[TokenType: ${this.type}, Literal: ${TokenType[this.type as keyof typeof TokenType]}]`;
   }
 }
