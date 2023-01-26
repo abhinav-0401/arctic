@@ -2,15 +2,16 @@ import { TokenType } from "../lexer/token"
 
 export type NodeType =
   | "Program"
-  | "NumericLiteral"
+  | "IntLiteral"
+  | "NullLiteral"
   | "Identifier"
   | "BinaryExpr";
 
 export class Stmt {
-  kind: NodeType;
+  type: NodeType;
 
-  constructor(kind: NodeType) {
-    this.kind = kind;
+  constructor(type: NodeType) {
+    this.type = type;
   }
 }
 
@@ -24,8 +25,8 @@ export class Program extends Stmt {
 }
 
 export class Expr extends Stmt {
-  constructor(kind: NodeType) {
-    super(kind);
+  constructor(type: NodeType) {
+    super(type);
   }
 }
 
@@ -51,11 +52,20 @@ export class Identifier extends Expr {
   }
 }
 
-export class NumericLiteral extends Expr {
+export class IntLiteral extends Expr {
   value: number;
 
   constructor(value: number) {
-    super("NumericLiteral");
+    super("IntLiteral");
     this.value = value;
+  }
+}
+
+export class NullLiteral extends Expr {
+  value: string;
+
+  constructor() {
+    super("NullLiteral");
+    this.value = "null";
   }
 }

@@ -1,5 +1,5 @@
 import { Token, TokenType } from "../lexer/token";
-import { Stmt, Program, Expr, NumericLiteral, Identifier, BinaryExpr } from "./ast";
+import { Stmt, Program, Expr, IntLiteral, NullLiteral, Identifier, BinaryExpr } from "./ast";
 
 export class Parser {
   private index: number;
@@ -67,7 +67,9 @@ export class Parser {
       case TokenType.Identifier:
         return new Identifier(currentToken.literal);
       case TokenType.Int:
-        return new NumericLiteral(parseInt(currentToken.literal));
+        return new IntLiteral(parseInt(currentToken.literal));
+      case TokenType.Null:
+        return new NullLiteral();
       case TokenType.LeftParenthesis:
         let expr: Expr = this.parseExpr();
         if (this.advance().type === TokenType.RightParenthesis) {

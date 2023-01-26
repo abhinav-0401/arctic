@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { Token } from "./lexer/token";
 import { Lexer } from "./lexer/lexer";
 import { Parser } from "./parser/parser";
+import { evaluate } from "./runtime/interpreter";
 
 main();
 
@@ -30,6 +31,7 @@ function runFile(filename: string): void {
   const parser = new Parser(tokens);
   const ast = parser.produceAST();
   console.log(ast.body);
+  console.log(evaluate(ast));
 }
 
 // function repl() {

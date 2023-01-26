@@ -1,5 +1,5 @@
 export enum TokenType {
-  Illegal,
+  Null,
   EOF,
 
   // Identifiers and literals
@@ -55,6 +55,7 @@ export const keywordMap: Map<string, TokenType> = new Map([
   ["if", TokenType.If],
   ["else", TokenType.Else],
   ["return", TokenType.Return],
+  ["null", TokenType.Null],
 ]);
 
 export class Token {
@@ -67,6 +68,6 @@ export class Token {
   }
 
   toString(): string {
-    return `[TokenType: ${this.type}, Literal: ${TokenType[this.type as keyof typeof TokenType]}]`;
+    return `[TokenType: ${TokenType[this.type as keyof typeof TokenType]}, Literal: ${this.literal}]`;
   }
 }

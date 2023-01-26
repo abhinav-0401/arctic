@@ -17,7 +17,7 @@ export class Lexer {
 
     while (this.index < this.srcLen) {
       let char: string = this.advance();
-      
+
       const newToken = this.tokenise(char);
       if (newToken.type === TokenType.IDK) {
         continue;
@@ -145,6 +145,7 @@ export class Lexer {
   }
 
   isAlphaNumeric(char: string): boolean {
+    // console.log(char);
     return (new RegExp("[a-zA-Z0-9]")).test(char);
   }
 
@@ -156,7 +157,7 @@ export class Lexer {
     const intToken = new Token(TokenType.Int, "");
     intToken.literal = intToken.literal.concat(char);
 
-    while (this.isDigit(this.peek())) {
+    while (this.index < this.srcLen && this.isDigit(this.peek())) {
       intToken.literal = intToken.literal.concat(this.advance());
     }
 
@@ -167,7 +168,7 @@ export class Lexer {
     const identToken = new Token(TokenType.IDK, "");
     identToken.literal = identToken.literal.concat(char);
 
-    while (this.isAlphaNumeric(this.peek())) {
+    while (this.index < this.srcLen && this.isAlphaNumeric(this.peek())) {
       identToken.literal = identToken.literal.concat(this.advance());
     }
 
