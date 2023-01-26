@@ -1,7 +1,7 @@
-// import * as readline from "node:readline";
 import { readFileSync } from "fs";
-import { TokenType, Token } from "./lexer/token";
+import { Token } from "./lexer/token";
 import { Lexer } from "./lexer/lexer";
+import { Parser } from "./parser/parser";
 
 main();
 
@@ -26,7 +26,10 @@ function runFile(filename: string): void {
   const tokens: Token[] = lexer.lex(src);
 
   // console.log(tokens);
-  Lexer.printTokens(tokens);
+  // Lexer.printTokens(tokens);
+  const parser = new Parser(tokens);
+  const ast = parser.produceAST();
+  console.log(ast.body);
 }
 
 // function repl() {

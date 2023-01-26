@@ -18,9 +18,15 @@ export class Lexer {
     while (this.index < this.srcLen) {
       let char: string = this.advance();
       
-      tokens.push(this.tokenise(char));
+      const newToken = this.tokenise(char);
+      if (newToken.type === TokenType.IDK) {
+        continue;
+      } else {
+        tokens.push(newToken);
+      }
     }
     
+    tokens.push(new Token(TokenType.EOF, ""));
     return tokens;
   }
 
@@ -108,9 +114,6 @@ export class Lexer {
       case '/t':
       case '/r':
       case '/n':
-        break;
-      case '':
-        token.type = TokenType.EOF;
         break;
       default:
         if (this.isDigit(char)) {
