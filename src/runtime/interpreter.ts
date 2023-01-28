@@ -1,5 +1,5 @@
 import { NullValue, IntValue, RuntimeValue } from "./values";
-import { BinaryExpr, Expr, Identifier, IntLiteral, Program, Stmt, VarDeclaration } from "../parser/ast";
+import { BinaryExpr, Expr, Identifier, IntLiteral, Program, Stmt, VarAssignment, VarDeclaration } from "../parser/ast";
 import { Environment } from "./environment";
 
 function evalProgram(program: Program, env: Environment): RuntimeValue {
@@ -13,12 +13,9 @@ function evalProgram(program: Program, env: Environment): RuntimeValue {
 /**
  * Evaulate pure numeric operations with binary operators.
  */
-function evalIntegralBinaryExpr(
-  lhs: IntValue,
-  rhs: IntValue,
-  operator: string,
-): IntValue {
+function evalIntegralBinaryExpr(lhs: IntValue, rhs: IntValue, operator: string): IntValue {
   let result: number;
+
   if (operator == "+") {
     result = lhs.value + rhs.value;
   } else if (operator == "-") {
@@ -62,13 +59,18 @@ function evalIdentifier(identifier: Identifier, env: Environment): RuntimeValue 
 
 function evalVarDeclaration(node: VarDeclaration, env: Environment): RuntimeValue {
   if (node.value) {
-    const value: RuntimeValue = evalBinaryExpr(node.value as BinaryExpr, env);
-    env.declareVar(node.identfier, value);
+    const value: RuntimeValue = evaluate(node.value, env);
+    env.declareVar(node.identifier, value);
     return value;
   }
-  
-  env.declareVar(node.identfier, new NullValue());
+
+  env.declareVar(node.identifier, new NullValue());
   return new NullValue();
+}
+
+function evalValAssignment(node: VarAssignment, env: Environment): RuntimeValue {
+  const value: RuntimeValue = evaluate(node.value, env);
+  return env.assignVar(node.identifier, value);
 }
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
@@ -83,6 +85,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
       return evalBinaryExpr(astNode as BinaryExpr, env);
     case "VarDeclaration":
       return evalVarDeclaration(astNode as VarDeclaration, env);
+    case "VarAssignment":
+      return evalValAssignment(astNode as VarAssignment, env);
     case "Program":
       return evalProgram(astNode as Program, env);
 

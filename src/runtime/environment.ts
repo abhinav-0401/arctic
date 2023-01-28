@@ -19,8 +19,14 @@ export class Environment {
   }
 
   lookupVar(varname: string): RuntimeValue {
-    const env = this.resolve(varname);
+    const env: Environment = this.resolve(varname);
     return env.variables.get(varname) as RuntimeValue;
+  }
+
+  assignVar(varname: string, value: RuntimeValue): RuntimeValue {
+    const env: Environment = this.resolve(varname);
+    env.variables.set(varname, value);
+    return value;
   }
 
   resolve(varname: string): Environment {

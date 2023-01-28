@@ -4,6 +4,7 @@ export type NodeType =
   // Statements
   | "Program"
   | "VarDeclaration"
+  | "VarAssignment"
   // Expressions
   | "IntLiteral"
   | "NullLiteral"
@@ -28,11 +29,23 @@ export class Program extends Stmt {
 }
 
 export class VarDeclaration extends Stmt {
-  identfier: string;
+  identifier: string;
   value?: Expr;
 
   constructor(identifier: string, value?: Expr) {
     super("VarDeclaration");
+    this.identifier = identifier;
+    this.value = value;
+  }
+}
+
+export class VarAssignment extends Stmt {
+  identifier: string;
+  value: Expr;
+
+  constructor(identifier: string, value: Expr) {
+    super("VarAssignment");
+    this.identifier = identifier;
     this.value = value;
   }
 }

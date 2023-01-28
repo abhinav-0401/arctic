@@ -1,5 +1,5 @@
 import { Token, TokenType } from "../lexer/token";
-import { Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr, VarDeclaration } from "./ast";
+import { Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr, VarDeclaration, VarAssignment } from "./ast";
 
 export class Parser {
   private index: number;
@@ -24,6 +24,8 @@ export class Parser {
     switch (this.peek().type) {
       case TokenType.Let:
         return this.parseVarDeclaration();
+      case TokenType.Identifier:
+        return this.parseVarAssignment();
       default:
         return this.parseExpr();
     }
@@ -42,6 +44,20 @@ export class Parser {
     const valExpr: Expr = this.parseExpr();
     const semi: Token = this.expect(TokenType.Semicolon);
     return new VarDeclaration(varname, valExpr);
+  }
+
+  parseVarAssignment(): Stmt {
+    const varname: string = this.peek().literal;
+
+    console.log(this.peek());
+    if (this.peekNext().type === TokenType.Assign) {
+      this.advance();
+      this.advance();
+      const valExpr: Expr = this.parseExpr();
+      const semi: Token = this.expect(TokenType.Semicolon);
+      return new VarAssignment(varname, valExpr);
+    }
+    return this.parseExpr();
   }
 
   parseExpr(): Expr {
@@ -103,6 +119,10 @@ export class Parser {
 
   peek(): Token {
     return this.tokens[this.index];
+  }
+
+  peekNext(): Token {
+    return this.tokens[this.index + 1];
   }
 
   advance(): Token {
