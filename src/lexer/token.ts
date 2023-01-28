@@ -1,5 +1,5 @@
 export enum TokenType {
-  Null,
+  // Null,
   EOF,
 
   // Identifiers and literals
@@ -25,8 +25,8 @@ export enum TokenType {
   // Keywords
   Function,
   Let,
-  True,
-  False,
+  // True,
+  // False,
   If,
   Else,
   Return,
@@ -50,12 +50,12 @@ export enum TokenType {
 export const keywordMap: Map<string, TokenType> = new Map([
   ["fun", TokenType.Function],
   ["let", TokenType.Let],
-  ["true", TokenType.True],
-  ["false", TokenType.False],
+  // ["true", TokenType.True],
+  // ["false", TokenType.False],
   ["if", TokenType.If],
   ["else", TokenType.Else],
   ["return", TokenType.Return],
-  ["null", TokenType.Null],
+  // ["null", TokenType.Null],
 ]);
 
 export class Token {

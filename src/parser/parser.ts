@@ -1,5 +1,5 @@
 import { Token, TokenType } from "../lexer/token";
-import { Stmt, Program, Expr, IntLiteral, NullLiteral, Identifier, BinaryExpr } from "./ast";
+import { Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr, VarDeclaration } from "./ast";
 
 export class Parser {
   private index: number;
@@ -21,7 +21,27 @@ export class Parser {
   }
 
   parseStmt(): Stmt {
-    return this.parseExpr();
+    switch (this.peek().type) {
+      case TokenType.Let:
+        return this.parseVarDeclaration();
+      default:
+        return this.parseExpr();
+    }
+  }
+
+  parseVarDeclaration(): Stmt {
+    const letToken: Token = this.advance();
+    const varname: string = this.expect(TokenType.Identifier).literal;
+    
+    if (this.peek().type === TokenType.Semicolon) {
+      this.advance();
+      return new VarDeclaration(varname);
+    }
+
+    const equal: Token = this.expect(TokenType.Assign);
+    const valExpr: Expr = this.parseExpr();
+    const semi: Token = this.expect(TokenType.Semicolon);
+    return new VarDeclaration(varname, valExpr);
   }
 
   parseExpr(): Expr {
@@ -68,8 +88,8 @@ export class Parser {
         return new Identifier(currentToken.literal);
       case TokenType.Int:
         return new IntLiteral(parseInt(currentToken.literal));
-      case TokenType.Null:
-        return new NullLiteral();
+      // case TokenType.Null:
+      //   return new NullLiteral();
       case TokenType.LeftParenthesis:
         let expr: Expr = this.parseExpr();
         if (this.advance().type === TokenType.RightParenthesis) {
@@ -93,5 +113,16 @@ export class Parser {
 
   isEOF(): boolean {
     return this.tokens[this.index].type === TokenType.EOF;
+  }
+
+  expect(expectedType: TokenType): Token {
+    const parsed: Token = this.advance();
+
+    if (parsed.type === expectedType) {
+      return parsed;
+    } else {
+      console.error(`Expected ${expectedType}, found ${parsed}`);
+      process.exit(1);
+    }
   }
 }

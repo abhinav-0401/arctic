@@ -1,10 +1,11 @@
 import { NullValue, IntValue, RuntimeValue } from "./values";
-import { BinaryExpr, IntLiteral, Program, Stmt } from "../parser/ast";
+import { BinaryExpr, Expr, Identifier, IntLiteral, Program, Stmt, VarDeclaration } from "../parser/ast";
+import { Environment } from "./environment";
 
-function evalProgram(program: Program): RuntimeValue {
-  let lastEvaluated: RuntimeValue = { type: "null", value: "null" } as NullValue;
+function evalProgram(program: Program, env: Environment): RuntimeValue {
+  let lastEvaluated: RuntimeValue = new NullValue();
   for (const statement of program.body) {
-    lastEvaluated = evaluate(statement);
+    lastEvaluated = evaluate(statement, env);
   }
   return lastEvaluated;
 }
@@ -31,15 +32,15 @@ function evalIntegralBinaryExpr(
     result = lhs.value % rhs.value;
   }
 
-  return { value: result, type: "int" };
+  return new IntValue(result);
 }
 
 /**
  * Evaulates expressions following the binary operation type.
  */
-function evalBinaryExpr(binop: BinaryExpr): RuntimeValue {
-  const lhs = evaluate(binop.left);
-  const rhs = evaluate(binop.right);
+function evalBinaryExpr(binop: BinaryExpr, env: Environment): RuntimeValue {
+  const lhs = evaluate(binop.left, env);
+  const rhs = evaluate(binop.right, env);
 
   // Only currently support numeric operations
   if (lhs.type == "int" && rhs.type == "int") {
@@ -51,19 +52,39 @@ function evalBinaryExpr(binop: BinaryExpr): RuntimeValue {
   }
 
   // One or both are NULL
-  return { type: "null", value: "null" } as NullValue;
+  return new NullValue();
 }
 
-export function evaluate(astNode: Stmt): RuntimeValue {
+function evalIdentifier(identifier: Identifier, env: Environment): RuntimeValue {
+  const identVal = env.lookupVar(identifier.symbol);
+  return identVal;
+}
+
+function evalVarDeclaration(node: VarDeclaration, env: Environment): RuntimeValue {
+  if (node.value) {
+    const value: RuntimeValue = evalBinaryExpr(node.value as BinaryExpr, env);
+    env.declareVar(node.identfier, value);
+    return value;
+  }
+  
+  env.declareVar(node.identfier, new NullValue());
+  return new NullValue();
+}
+
+export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
   switch (astNode.type) {
+    case "Identifier":
+      return evalIdentifier(astNode as Identifier, env);
     case "IntLiteral":
       return new IntValue((astNode as IntLiteral).value);
     case "NullLiteral":
       return new NullValue();
     case "BinaryExpr":
-      return evalBinaryExpr(astNode as BinaryExpr);
+      return evalBinaryExpr(astNode as BinaryExpr, env);
+    case "VarDeclaration":
+      return evalVarDeclaration(astNode as VarDeclaration, env);
     case "Program":
-      return evalProgram(astNode as Program);
+      return evalProgram(astNode as Program, env);
 
     // Handle unimplimented ast types as error.
     default:

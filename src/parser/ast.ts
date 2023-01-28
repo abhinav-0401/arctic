@@ -1,7 +1,10 @@
 import { TokenType } from "../lexer/token"
 
 export type NodeType =
+  // Statements
   | "Program"
+  | "VarDeclaration"
+  // Expressions
   | "IntLiteral"
   | "NullLiteral"
   | "Identifier"
@@ -21,6 +24,16 @@ export class Program extends Stmt {
   constructor(body: Stmt[]) {
     super("Program");
     this.body = body;
+  }
+}
+
+export class VarDeclaration extends Stmt {
+  identfier: string;
+  value?: Expr;
+
+  constructor(identifier: string, value?: Expr) {
+    super("VarDeclaration");
+    this.value = value;
   }
 }
 
@@ -58,14 +71,5 @@ export class IntLiteral extends Expr {
   constructor(value: number) {
     super("IntLiteral");
     this.value = value;
-  }
-}
-
-export class NullLiteral extends Expr {
-  value: string;
-
-  constructor() {
-    super("NullLiteral");
-    this.value = "null";
   }
 }

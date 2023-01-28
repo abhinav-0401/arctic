@@ -3,6 +3,9 @@ import { Token } from "./lexer/token";
 import { Lexer } from "./lexer/lexer";
 import { Parser } from "./parser/parser";
 import { evaluate } from "./runtime/interpreter";
+import { Environment } from "./runtime/environment";
+import { BooleanValue, IntValue, NullValue, RuntimeValue } from "./runtime/values";
+import { VarDeclaration } from "./parser/ast";
 
 main();
 
@@ -30,8 +33,14 @@ function runFile(filename: string): void {
   // Lexer.printTokens(tokens);
   const parser = new Parser(tokens);
   const ast = parser.produceAST();
-  console.log(ast.body);
-  console.log(evaluate(ast));
+  // console.log(ast.body);
+
+  const globalEnv = new Environment();
+  globalEnv.declareVar("bday", new IntValue(4));
+  globalEnv.declareVar("true", new BooleanValue(true));
+  globalEnv.declareVar("false", new BooleanValue(false));
+  globalEnv.declareVar("null", new NullValue());
+  console.log(evaluate(ast, globalEnv));
 }
 
 // function repl() {

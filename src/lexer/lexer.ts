@@ -35,13 +35,22 @@ export class Lexer {
 
     switch (char) {
       case '=':
-        token.type = TokenType.Assign;
-        token.literal = char;
+        switch(this.peek()) {
+          case "=":
+            token.type = TokenType.Equal;
+            token.literal = "==";
+            this.advance();
+            break;
+          default :
+            token.type = TokenType.Assign;
+            token.literal = char;    
+            break;
+        }
         break;
-      case '==':
-        token.type = TokenType.Equal;
-        token.literal = char;
-        break;
+      // case '==':
+      //   token.type = TokenType.Equal;
+      //   token.literal = char;
+      //   break;
       case '!=':
         token.type = TokenType.NotEqual;
         token.literal = char;
