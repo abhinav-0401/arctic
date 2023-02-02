@@ -1,0 +1,14 @@
+let pi = 3;
+
+fun hi() {
+    3
+}
+
+fun hey() {
+    let c = 5 + 4 * 3 + hi();
+    print pi;
+    c
+}
+
+print 10 + hey();
+print 20 + hey();

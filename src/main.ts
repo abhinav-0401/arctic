@@ -30,10 +30,10 @@ function runFile(filename: string): void {
   const tokens: Token[] = lexer.lex(src);
 
   // console.log(tokens);
-  Lexer.printTokens(tokens);
+  // Lexer.printTokens(tokens);
   const parser = new Parser(tokens);
   const ast = parser.produceAST();
-  console.log(ast.body);
+  // console.log(ast.body);
 
   const globalEnv = new Environment();
   globalEnv.declareVar("bday", new IntValue(4));

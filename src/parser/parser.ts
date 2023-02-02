@@ -1,5 +1,8 @@
 import { Token, TokenType } from "../lexer/token";
-import { Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr, VarDeclaration, VarAssignment } from "./ast";
+import { 
+  Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr,
+  VarDeclaration, VarAssignment, FunDeclaration, PrintStmt, FunCall,
+} from "./ast";
 
 export class Parser {
   private index: number;
@@ -26,6 +29,10 @@ export class Parser {
         return this.parseVarDeclaration();
       case TokenType.Identifier:
         return this.parseVarAssignment();
+      case TokenType.Function:
+        return this.parseFunDeclaration();
+      case TokenType.Print:
+        return this.parsePrint();
       default:
         return this.parseExpr();
     }
@@ -33,31 +40,59 @@ export class Parser {
 
   parseVarDeclaration(): Stmt {
     const letToken: Token = this.advance();
-    const varname: string = this.expect(TokenType.Identifier).literal;
+    const varName: string = this.expect(TokenType.Identifier).literal;
     
     if (this.peek().type === TokenType.Semicolon) {
       this.advance();
-      return new VarDeclaration(varname);
+      return new VarDeclaration(varName);
     }
 
     const equal: Token = this.expect(TokenType.Assign);
     const valExpr: Expr = this.parseExpr();
     const semi: Token = this.expect(TokenType.Semicolon);
-    return new VarDeclaration(varname, valExpr);
+    return new VarDeclaration(varName, valExpr);
   }
 
   parseVarAssignment(): Stmt {
-    const varname: string = this.peek().literal;
+    const varName: string = this.peek().literal;
 
     console.log(this.peek());
     if (this.peekNext().type === TokenType.Assign) {
-      this.advance();
-      this.advance();
+      this.advance(); // eat the identifier token as wee already have it
+      this.advance(); // eat the equals sign as we have already checked for it
       const valExpr: Expr = this.parseExpr();
       const semi: Token = this.expect(TokenType.Semicolon);
-      return new VarAssignment(varname, valExpr);
+      return new VarAssignment(varName, valExpr);
     }
     return this.parseExpr();
+  }
+
+  parseFunDeclaration(): Stmt {
+    const body: Stmt[] = [];
+
+    this.advance();   // skip the "fun" keyword
+    const funName: Token = this.advance();
+
+    this.expect(TokenType.LeftParenthesis);
+    this.expect(TokenType.RightParenthesis);
+    this.expect(TokenType.LeftBrace);
+
+    while (this.peek().type !== TokenType.RightBrace) {
+      const funStmt: Stmt = this.parseStmt();
+      body.push(funStmt);
+    }
+    this.advance();   // get past the closing brace
+
+    return new FunDeclaration(funName.literal, body);
+  }
+
+  parsePrint(): Stmt {
+    this.advance();   // skip the "print" keyword
+
+    const expr: Expr = this.parseExpr();
+    this.expect(TokenType.Semicolon);
+
+    return new PrintStmt(expr);
   }
 
   parseExpr(): Expr {
@@ -101,7 +136,11 @@ export class Parser {
 
     switch (currentToken.type) {
       case TokenType.Identifier:
-        return new Identifier(currentToken.literal);
+        if (this.peek().type === TokenType.LeftParenthesis) {
+          return this.parseFunCall(currentToken);
+        } else {
+          return new Identifier(currentToken.literal);
+        }
       case TokenType.Int:
         return new IntLiteral(parseInt(currentToken.literal));
       // case TokenType.Null:
@@ -111,10 +150,19 @@ export class Parser {
         if (this.advance().type === TokenType.RightParenthesis) {
           return expr;
         }
+
       default:
         console.error("Token not supported by the parser :/", currentToken);
         process.exit(1);
     }
+  }
+
+  parseFunCall(identToken: Token): Expr {
+    console.log("parseFunCall was called");
+    this.advance();     // we already know that there is a left parenthesis
+    this.expect(TokenType.RightParenthesis);
+
+    return new FunCall(identToken.literal);
   }
 
   peek(): Token {

@@ -24,12 +24,14 @@ export enum TokenType {
 
   // Keywords
   Function,
+  Procedure,
   Let,
   // True,
   // False,
   If,
   Else,
   Return,
+  Print,
 
   LeftParenthesis,
   RightParenthesis,
@@ -50,12 +52,14 @@ export enum TokenType {
 export const keywordMap: Map<string, TokenType> = new Map([
   ["fun", TokenType.Function],
   ["let", TokenType.Let],
+  // ["proc", TokenType.Procedure],
   // ["true", TokenType.True],
   // ["false", TokenType.False],
   ["if", TokenType.If],
   ["else", TokenType.Else],
   ["return", TokenType.Return],
   // ["null", TokenType.Null],
+  ["print", TokenType.Print],
 ]);
 
 export class Token {

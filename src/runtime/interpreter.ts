@@ -1,5 +1,8 @@
 import { NullValue, IntValue, RuntimeValue } from "./values";
-import { BinaryExpr, Expr, Identifier, IntLiteral, Program, Stmt, VarAssignment, VarDeclaration } from "../parser/ast";
+import { 
+  BinaryExpr, Expr, Identifier, IntLiteral, FunCall,                          // Expressions
+  Program, Stmt, VarAssignment, VarDeclaration, FunDeclaration, PrintStmt     // Statements  
+} from "../parser/ast";
 import { Environment } from "./environment";
 
 function evalProgram(program: Program, env: Environment): RuntimeValue {
@@ -73,6 +76,38 @@ function evalValAssignment(node: VarAssignment, env: Environment): RuntimeValue 
   return env.assignVar(node.identifier, value);
 }
 
+function evalFunDeclaration(node: FunDeclaration, env: Environment): RuntimeValue {
+  env.declareFun(node.identifier, node.body);
+
+  return new NullValue();
+}
+
+function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
+  const funBody: Stmt[] = env.lookupFun(node.identifier);
+  // create a new environment for the function
+  const funEnv: Environment = new Environment();
+
+  // set the new environment for the function
+  env.setFunEnv(node.identifier, funEnv);
+  funEnv.setParentEnv(env);
+
+  let lastEvaluated: RuntimeValue = new NullValue();
+  for (const funStmt of funBody) {
+    lastEvaluated = evaluate(funStmt, funEnv);
+  }
+
+  // destroy the function environment
+  env.destroyFunEnv(node.identifier);
+
+  return lastEvaluated;
+}
+
+function evalPrintStmt(node: PrintStmt, env: Environment): RuntimeValue {
+  console.log(evaluate(node.argument, env));
+
+  return new NullValue();
+}
+
 export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
   switch (astNode.type) {
     case "Identifier":
@@ -87,6 +122,12 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
       return evalVarDeclaration(astNode as VarDeclaration, env);
     case "VarAssignment":
       return evalValAssignment(astNode as VarAssignment, env);
+    case "FunDeclaration":
+      return evalFunDeclaration(astNode as FunDeclaration, env);
+    case "FunCall":
+      return evalFunCall(astNode as FunCall, env);
+    case "PrintStmt":
+      return evalPrintStmt(astNode as PrintStmt, env);
     case "Program":
       return evalProgram(astNode as Program, env);
 

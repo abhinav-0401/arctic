@@ -5,11 +5,14 @@ export type NodeType =
   | "Program"
   | "VarDeclaration"
   | "VarAssignment"
+  | "FunDeclaration"
+  | "PrintStmt"
   // Expressions
   | "IntLiteral"
   | "NullLiteral"
   | "Identifier"
-  | "BinaryExpr";
+  | "BinaryExpr"
+  | "FunCall";
 
 export class Stmt {
   type: NodeType;
@@ -50,6 +53,26 @@ export class VarAssignment extends Stmt {
   }
 }
 
+export class FunDeclaration extends Stmt {
+  identifier: string;
+  body: Stmt[];
+
+  constructor(identifier: string, body: Stmt[]) {
+    super("FunDeclaration");
+    this.identifier = identifier;
+    this.body = body;
+  }
+}
+
+export class PrintStmt extends Stmt {
+  argument: Expr;
+
+  constructor(argument: Expr) {
+    super("PrintStmt");
+    this.argument = argument;
+  }
+}
+
 export class Expr extends Stmt {
   constructor(type: NodeType) {
     super(type);
@@ -84,5 +107,14 @@ export class IntLiteral extends Expr {
   constructor(value: number) {
     super("IntLiteral");
     this.value = value;
+  }
+}
+
+export class FunCall extends Expr {
+  identifier: string;
+
+  constructor(identifier: string) {
+    super("FunCall");
+    this.identifier = identifier;
   }
 }
