@@ -1,7 +1,7 @@
 import { Token, TokenType } from "../lexer/token";
 import { 
   Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr,
-  VarDeclaration, VarAssignment, FunDeclaration, PrintStmt, FunCall,
+  VarDeclaration, VarAssignment, FunDeclaration, PrintStmt, FunCall, ReturnStmt,
 } from "./ast";
 
 export class Parser {
@@ -33,6 +33,8 @@ export class Parser {
         return this.parseFunDeclaration();
       case TokenType.Print:
         return this.parsePrint();
+      case TokenType.Return:
+        return this.parseReturnStmt();
       default:
         return this.parseExpr();
     }
@@ -56,7 +58,6 @@ export class Parser {
   parseVarAssignment(): Stmt {
     const varName: string = this.peek().literal;
 
-    console.log(this.peek());
     if (this.peekNext().type === TokenType.Assign) {
       this.advance(); // eat the identifier token as wee already have it
       this.advance(); // eat the equals sign as we have already checked for it
@@ -93,6 +94,15 @@ export class Parser {
     this.expect(TokenType.Semicolon);
 
     return new PrintStmt(expr);
+  }
+
+  parseReturnStmt(): Stmt {
+    this.advance();   // skip the "return" keyword
+    const value: Expr = this.parseExpr();
+    this.expect(TokenType.Semicolon);
+
+    // console.log(value);
+    return new ReturnStmt(value);
   }
 
   parseExpr(): Expr {
@@ -152,13 +162,12 @@ export class Parser {
         }
 
       default:
-        console.error("Token not supported by the parser :/", currentToken);
+        console.error("Token not supported by the parser :/", currentToken, this.peek(), this.peekNext());
         process.exit(1);
     }
   }
 
   parseFunCall(identToken: Token): Expr {
-    console.log("parseFunCall was called");
     this.advance();     // we already know that there is a left parenthesis
     this.expect(TokenType.RightParenthesis);
 
@@ -189,7 +198,7 @@ export class Parser {
     if (parsed.type === expectedType) {
       return parsed;
     } else {
-      console.error(`Expected ${expectedType}, found ${parsed}`);
+      console.error(`Expected ${TokenType[expectedType as keyof typeof TokenType]}, found ${parsed.toString()}`);
       process.exit(1);
     }
   }
