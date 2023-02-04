@@ -7,6 +7,7 @@ export type NodeType =
   | "VarAssignment"
   | "FunDeclaration"
   | "PrintStmt"
+  | "ReturnStmt"
   // Expressions
   | "IntLiteral"
   | "NullLiteral"
@@ -61,6 +62,15 @@ export class FunDeclaration extends Stmt {
     super("FunDeclaration");
     this.identifier = identifier;
     this.body = body;
+  }
+}
+
+export class ReturnStmt extends Stmt {
+  value: Expr;
+
+  constructor(value: Expr) {
+    super("ReturnStmt");
+    this.value = value;
   }
 }
 

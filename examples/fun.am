@@ -5,10 +5,23 @@ fun hi() {
 }
 
 fun hey() {
-    let c = 5 + 4 * 3 + hi();
-    print pi;
+    let c = 5 + 5 * 3 + hi();
+    #print pi;
     c
+    #print c;
 }
 
 print 10 + hey();
-print 20 + hey();
+#print 20 + hey();
+
+# return pi;
+
+fun loop() {
+    print 20;
+    loop()
+    #hey()
+    #print 30;
+
+}
+
+loop()

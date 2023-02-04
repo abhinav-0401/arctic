@@ -33,7 +33,7 @@ function runFile(filename: string): void {
   // Lexer.printTokens(tokens);
   const parser = new Parser(tokens);
   const ast = parser.produceAST();
-  // console.log(ast.body);
+  console.log(ast.body);
 
   const globalEnv = new Environment();
   globalEnv.declareVar("bday", new IntValue(4));

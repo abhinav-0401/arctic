@@ -119,6 +119,12 @@ export class Lexer {
         token.type = TokenType.Colon;
         token.literal = char;
         break;
+      case '#':
+        while (this.peek() !== '\n' && this.index < this.srcLen) {
+          this.advance();
+        }
+        this.advance();
+        break;
       case ' ':
       case '/t':
       case '/r':

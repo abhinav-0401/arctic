@@ -1,7 +1,8 @@
 import { NullValue, IntValue, RuntimeValue } from "./values";
 import { 
   BinaryExpr, Expr, Identifier, IntLiteral, FunCall,                          // Expressions
-  Program, Stmt, VarAssignment, VarDeclaration, FunDeclaration, PrintStmt     // Statements  
+  Program, Stmt, VarAssignment, VarDeclaration, FunDeclaration, PrintStmt,     // Statements  
+  ReturnStmt
 } from "../parser/ast";
 import { Environment } from "./environment";
 
@@ -13,9 +14,6 @@ function evalProgram(program: Program, env: Environment): RuntimeValue {
   return lastEvaluated;
 }
 
-/**
- * Evaulate pure numeric operations with binary operators.
- */
 function evalIntegralBinaryExpr(lhs: IntValue, rhs: IntValue, operator: string): IntValue {
   let result: number;
 
@@ -35,9 +33,6 @@ function evalIntegralBinaryExpr(lhs: IntValue, rhs: IntValue, operator: string):
   return new IntValue(result);
 }
 
-/**
- * Evaulates expressions following the binary operation type.
- */
 function evalBinaryExpr(binop: BinaryExpr, env: Environment): RuntimeValue {
   const lhs = evaluate(binop.left, env);
   const rhs = evaluate(binop.right, env);
@@ -93,7 +88,12 @@ function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
 
   let lastEvaluated: RuntimeValue = new NullValue();
   for (const funStmt of funBody) {
-    lastEvaluated = evaluate(funStmt, funEnv);
+    if (funStmt.type !== "ReturnStmt") {
+      lastEvaluated = evaluate(funStmt, funEnv);
+    } else {
+      lastEvaluated = evaluate((funStmt as ReturnStmt).value, funEnv);
+      break;
+    }
   }
 
   // destroy the function environment
@@ -103,7 +103,7 @@ function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
 }
 
 function evalPrintStmt(node: PrintStmt, env: Environment): RuntimeValue {
-  console.log(evaluate(node.argument, env));
+  console.log((evaluate(node.argument, env) as IntValue).value);
 
   return new NullValue();
 }
@@ -130,7 +130,12 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
       return evalPrintStmt(astNode as PrintStmt, env);
     case "Program":
       return evalProgram(astNode as Program, env);
-
+    case "ReturnStmt":
+      console.error(
+        "Cannot have return stmt outside of function body",
+        astNode,
+      );
+      process.exit(2);
     // Handle unimplimented ast types as error.
     default:
       console.error(
