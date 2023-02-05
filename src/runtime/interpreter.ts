@@ -1,6 +1,6 @@
-import { NullValue, IntValue, RuntimeValue } from "./values";
+import { NullValue, IntValue, BooleanValue , RuntimeValue } from "./values";
 import { 
-  BinaryExpr, Expr, Identifier, IntLiteral, FunCall,                          // Expressions
+  BinaryExpr, Expr, Identifier, IntLiteral, FunCall, IfExpr,                    // Expressions
   Program, Stmt, VarAssignment, VarDeclaration, FunDeclaration, PrintStmt,     // Statements  
   ReturnStmt
 } from "../parser/ast";
@@ -102,6 +102,28 @@ function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
   return lastEvaluated;
 }
 
+function evalIfExpr(node: IfExpr, env: Environment): RuntimeValue {
+  const ifEnv: Environment = new Environment();
+  ifEnv.setParentEnv(env);
+
+  let lastEvaluated: RuntimeValue = new NullValue();
+  const conditionValue: RuntimeValue = evaluate(node.condition, env);
+  
+  if (conditionValue.type !== "boolean") {
+    throw "If Expression's condition must evaluate to a boolean value";
+  } else if ((conditionValue as BooleanValue).value) {
+    for (const ifBlockStmt of node.ifBlock) {
+      lastEvaluated = evaluate(ifBlockStmt, ifEnv);
+    }
+  } else if (node.elseBlock) {
+    for (const elseBlockStmt of node.elseBlock) {
+      lastEvaluated = evaluate(elseBlockStmt, ifEnv);
+    }
+  }
+
+  return lastEvaluated;
+}
+
 function evalPrintStmt(node: PrintStmt, env: Environment): RuntimeValue {
   console.log((evaluate(node.argument, env) as IntValue).value);
 
@@ -118,6 +140,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
       return new NullValue();
     case "BinaryExpr":
       return evalBinaryExpr(astNode as BinaryExpr, env);
+    case "IfExpr":
+      return evalIfExpr(astNode as IfExpr, env);
     case "VarDeclaration":
       return evalVarDeclaration(astNode as VarDeclaration, env);
     case "VarAssignment":

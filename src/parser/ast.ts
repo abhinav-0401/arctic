@@ -13,7 +13,8 @@ export type NodeType =
   | "NullLiteral"
   | "Identifier"
   | "BinaryExpr"
-  | "FunCall";
+  | "FunCall"
+  | "IfExpr";
 
 export class Stmt {
   type: NodeType;
@@ -126,5 +127,20 @@ export class FunCall extends Expr {
   constructor(identifier: string) {
     super("FunCall");
     this.identifier = identifier;
+  }
+}
+
+export class IfExpr extends Expr {
+  ifBlock: Stmt[];
+  condition: Expr;
+  elseBlock?: Stmt[];
+
+  constructor(condition: Expr, ifBlock: Stmt[], elseBlock?: Stmt[]) {
+    super("IfExpr");
+    this.condition = condition;
+    this.ifBlock = ifBlock;
+    if (elseBlock) {
+      this.elseBlock = elseBlock;
+    }
   }
 }

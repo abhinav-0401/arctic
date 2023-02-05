@@ -1,4 +1,11 @@
 let hey = 10 * 3;
 let hi = hey;
 hi = 10;
-hi + hey
+
+print hi;
+
+if (true) {
+    print 1;
+} else {
+    print 2;
+}

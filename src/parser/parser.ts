@@ -1,7 +1,7 @@
 import { Token, TokenType } from "../lexer/token";
 import { 
-  Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr,
-  VarDeclaration, VarAssignment, FunDeclaration, PrintStmt, FunCall, ReturnStmt,
+  Stmt, Program, Expr, IntLiteral, Identifier, BinaryExpr, IfExpr,                  // expressions
+  VarDeclaration, VarAssignment, FunDeclaration, PrintStmt, FunCall, ReturnStmt,    // statements
 } from "./ast";
 
 export class Parser {
@@ -141,6 +141,47 @@ export class Parser {
     return left;
   }
 
+
+  parseFunCall(identToken: Token): Expr {
+    this.advance();     // we already know that there is a left parenthesis
+    this.expect(TokenType.RightParenthesis);
+
+    return new FunCall(identToken.literal);
+  }
+
+  parseIfExpr(): Expr {
+    this.expect(TokenType.LeftParenthesis);
+
+    const condition: Expr = this.parseExpr();
+    if (!condition) { throw "An if expression must have a condition within parenthesis"; }
+    
+    this.expect(TokenType.RightParenthesis);
+    this.expect(TokenType.LeftBrace);
+    
+    const ifBlock: Stmt[] = [];
+    const elseBlock: Stmt[] = [];
+
+    while (this.peek().type !== TokenType.RightBrace) {
+      ifBlock.push(this.parseStmt());
+    }
+    this.advance();
+    console.log(this.peek());
+
+    if (this.peek().type === TokenType.Else) {
+      this.advance();
+
+      this.expect(TokenType.LeftBrace);
+      while (this.peek().type !== TokenType.RightBrace) {
+        elseBlock.push(this.parseStmt());
+      }
+      this.advance();
+
+      return new IfExpr(condition, ifBlock, elseBlock);
+    } else {
+      return new IfExpr(condition, ifBlock);
+    }
+  }
+
   parsePrimary(): Expr {
     let currentToken: Token = this.advance();
 
@@ -160,18 +201,13 @@ export class Parser {
         if (this.advance().type === TokenType.RightParenthesis) {
           return expr;
         }
+      case TokenType.If:
+        return this.parseIfExpr();
 
       default:
         console.error("Token not supported by the parser :/", currentToken, this.peek(), this.peekNext());
         process.exit(1);
     }
-  }
-
-  parseFunCall(identToken: Token): Expr {
-    this.advance();     // we already know that there is a left parenthesis
-    this.expect(TokenType.RightParenthesis);
-
-    return new FunCall(identToken.literal);
   }
 
   peek(): Token {
