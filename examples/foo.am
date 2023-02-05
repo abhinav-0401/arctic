@@ -5,7 +5,11 @@ hi = 10;
 print hi;
 
 if (true) {
-    print 1;
+    let ab = 100;
+    print hi;
+    print ab;
 } else {
     print 2;
 }
+
+print ab;
