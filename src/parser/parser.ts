@@ -51,6 +51,7 @@ export class Parser {
 
     const equal: Token = this.expect(TokenType.Assign);
     const valExpr: Expr = this.parseExpr();
+    console.log(valExpr);
     const semi: Token = this.expect(TokenType.Semicolon);
     return new VarDeclaration(varName, valExpr);
   }
@@ -98,11 +99,15 @@ export class Parser {
 
   parseReturnStmt(): Stmt {
     this.advance();   // skip the "return" keyword
-    const value: Expr = this.parseExpr();
-    this.expect(TokenType.Semicolon);
 
-    // console.log(value);
-    return new ReturnStmt(value);
+    if (this.peek().type !== TokenType.Semicolon) {
+      const value: Expr = this.parseExpr();
+      this.expect(TokenType.Semicolon);  
+      return new ReturnStmt(value);
+    } else {
+      this.advance();
+      return new ReturnStmt();
+    }
   }
 
   parseExpr(): Expr {
@@ -151,6 +156,7 @@ export class Parser {
 
   parseIfExpr(): Expr {
     this.expect(TokenType.LeftParenthesis);
+    console.log("inside if expr");
 
     const condition: Expr = this.parseExpr();
     if (!condition) { throw "An if expression must have a condition within parenthesis"; }

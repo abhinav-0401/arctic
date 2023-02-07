@@ -1,4 +1,4 @@
-export type ValueType = "null" | "int" | "boolean";
+export type ValueType = "null" | "int" | "boolean" | "return";
 
 export class RuntimeValue {
   type: ValueType;
@@ -31,6 +31,15 @@ export class BooleanValue extends RuntimeValue {
 
   constructor(value: boolean) {
     super("boolean");
+    this.value = value;
+  }
+}
+
+export class ReturnValue extends RuntimeValue {
+  value: RuntimeValue;
+
+  constructor(value: RuntimeValue) {
+    super("return");
     this.value = value;
   }
 }

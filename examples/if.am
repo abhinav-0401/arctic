@@ -1,0 +1,7 @@
+fun main() {
+    let x = if (true) { 4 } else { 5 } + 4;
+
+    print x;
+}
+
+main()

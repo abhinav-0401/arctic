@@ -42,7 +42,7 @@ function runFile(filename: string): void {
   globalEnv.declareVar("null", new NullValue());
   globalEnv.declareVar("x", new IntValue(10));
 
-  console.log(evaluate(ast, globalEnv));
+  console.log("Program returned", evaluate(ast, globalEnv));
 }
 
 // function repl() {

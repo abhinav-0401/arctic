@@ -11,5 +11,3 @@ if (true) {
 } else {
     print 2;
 }
-
-print ab;

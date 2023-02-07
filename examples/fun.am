@@ -7,7 +7,7 @@ fun hi() {
 fun hey() {
     let c = 5 + 5 * 3 + hi();
     #print pi;
-    c
+    return c;
     #print c;
 }
 
@@ -18,9 +18,15 @@ print 10 + hey();
 
 fun loop() {
     print 20;
-    loop()
+    if (false) {
+        return;
+    } else {
+        loop()
+    }
     #hey()
     #print 30;
 }
 
 loop()
+
+return 20;

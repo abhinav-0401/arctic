@@ -1,4 +1,4 @@
-import { NullValue, IntValue, BooleanValue , RuntimeValue } from "./values";
+import { NullValue, IntValue, BooleanValue , RuntimeValue, ReturnValue } from "./values";
 import { 
   BinaryExpr, Expr, Identifier, IntLiteral, FunCall, IfExpr,                    // Expressions
   Program, Stmt, VarAssignment, VarDeclaration, FunDeclaration, PrintStmt,     // Statements  
@@ -10,6 +10,17 @@ function evalProgram(program: Program, env: Environment): RuntimeValue {
   let lastEvaluated: RuntimeValue = new NullValue();
   for (const statement of program.body) {
     lastEvaluated = evaluate(statement, env);
+    if (lastEvaluated.type === "return") {
+      // @ts-ignore
+      const returnValue: RuntimeValue | undefined = (lastEvaluated as ReturnValue).value;
+      if (returnValue) {
+        lastEvaluated = returnValue;
+      } else {
+        lastEvaluated = new NullValue();
+      }
+
+      break;
+    }
   }
   return lastEvaluated;
 }
@@ -34,8 +45,16 @@ function evalIntegralBinaryExpr(lhs: IntValue, rhs: IntValue, operator: string):
 }
 
 function evalBinaryExpr(binop: BinaryExpr, env: Environment): RuntimeValue {
-  const lhs = evaluate(binop.left, env);
-  const rhs = evaluate(binop.right, env);
+  let lhs: RuntimeValue = evaluate(binop.left, env)
+  let rhs: RuntimeValue = evaluate(binop.right, env);
+
+  if (lhs.type === "return") {
+    lhs = (lhs as ReturnValue).value;
+  }
+
+  if (rhs.type === "return") {
+    rhs = (rhs as ReturnValue).value;
+  }
 
   // Only currently support numeric operations
   if (lhs.type == "int" && rhs.type == "int") {
@@ -78,6 +97,7 @@ function evalFunDeclaration(node: FunDeclaration, env: Environment): RuntimeValu
 }
 
 function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
+  // console.log("evalFunCall");
   const funBody: Stmt[] = env.lookupFun(node.identifier);
   // create a new environment for the function
   const funEnv: Environment = new Environment();
@@ -86,12 +106,28 @@ function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
   env.setFunEnv(node.identifier, funEnv);
   funEnv.setParentEnv(env);
 
-  let lastEvaluated: RuntimeValue = new NullValue();
+  let lastEvaluated: RuntimeValue;
   for (const funStmt of funBody) {
     if (funStmt.type !== "ReturnStmt") {
+      // console.log(funStmt);
       lastEvaluated = evaluate(funStmt, funEnv);
+      if (lastEvaluated.type === "return") {
+        // @ts-ignore
+        const returnValue: RuntimeValue | undefined = (lastEvaluated as ReturnValue).value;
+        if (returnValue) {
+          lastEvaluated = returnValue;
+        } else {
+          lastEvaluated = new NullValue();
+        }
+        break;
+      }
     } else {
-      lastEvaluated = evaluate((funStmt as ReturnStmt).value, funEnv);
+      const expr: Expr | undefined = (funStmt as ReturnStmt).value;
+      if (expr) {
+        lastEvaluated = evaluate(expr, funEnv);
+      } else {
+        lastEvaluated = new NullValue();
+      }
       break;
     }
   }
@@ -99,10 +135,12 @@ function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
   // destroy the function environment
   env.destroyFunEnv(node.identifier);
 
+  // @ts-ignore
   return lastEvaluated;
 }
 
 function evalIfExpr(node: IfExpr, env: Environment): RuntimeValue {
+  // console.log("inside evalIfExpr");
   const ifEnv: Environment = new Environment();
   ifEnv.setParentEnv(env);
 
@@ -113,7 +151,11 @@ function evalIfExpr(node: IfExpr, env: Environment): RuntimeValue {
     throw "If Expression's condition must evaluate to a boolean value";
   } else if ((conditionValue as BooleanValue).value) {
     for (const ifBlockStmt of node.ifBlock) {
-      lastEvaluated = evaluate(ifBlockStmt, ifEnv);
+      if (ifBlockStmt.type !== "ReturnStmt") {
+        lastEvaluated = evaluate(ifBlockStmt, ifEnv);
+      } else {
+        lastEvaluated = evalReturnStmt(ifBlockStmt as ReturnStmt, env); 
+      }     
     }
   } else if (node.elseBlock) {
     for (const elseBlockStmt of node.elseBlock) {
@@ -122,6 +164,14 @@ function evalIfExpr(node: IfExpr, env: Environment): RuntimeValue {
   }
 
   return lastEvaluated;
+}
+
+function evalReturnStmt(node: ReturnStmt, env: Environment): ReturnValue {
+  if (node.value) {
+    return new ReturnValue(evaluate(node.value, env));
+  } else {
+    return new ReturnValue(new NullValue());
+  }
 }
 
 function evalPrintStmt(node: PrintStmt, env: Environment): RuntimeValue {
@@ -155,11 +205,7 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeValue {
     case "Program":
       return evalProgram(astNode as Program, env);
     case "ReturnStmt":
-      console.error(
-        "Cannot have return stmt outside of function body",
-        astNode,
-      );
-      process.exit(2);
+      return evalReturnStmt(astNode as ReturnStmt, env);
     // Handle unimplimented ast types as error.
     default:
       console.error(

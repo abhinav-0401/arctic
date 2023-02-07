@@ -67,11 +67,13 @@ export class FunDeclaration extends Stmt {
 }
 
 export class ReturnStmt extends Stmt {
-  value: Expr;
+  value?: Expr;
 
-  constructor(value: Expr) {
+  constructor(value?: Expr) {
     super("ReturnStmt");
-    this.value = value;
+    if (value) {
+      this.value = value;
+    }
   }
 }
 
