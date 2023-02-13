@@ -1,5 +1,9 @@
+fun three() {
+    3
+}
+
 fun main() {
-    let x = if (true) { 4 } else { 5 } + 4;
+    let x = if (3 == three()) { 4 } else { 5 } + 4;
 
     print x;
 }

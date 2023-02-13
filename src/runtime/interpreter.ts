@@ -25,23 +25,38 @@ function evalProgram(program: Program, env: Environment): RuntimeValue {
   return lastEvaluated;
 }
 
-function evalIntegralBinaryExpr(lhs: IntValue, rhs: IntValue, operator: string): IntValue {
-  let result: number;
+function evalIntegralBinaryExpr(lhs: IntValue, rhs: IntValue, operator: string): IntValue | BooleanValue {
+  let result: number | boolean;
 
-  if (operator == "+") {
+  if (operator === "+") {
     result = lhs.value + rhs.value;
-  } else if (operator == "-") {
+  } else if (operator === "-") {
     result = lhs.value - rhs.value;
-  } else if (operator == "*") {
+  } else if (operator === "*") {
     result = lhs.value * rhs.value;
-  } else if (operator == "/") {
+  } else if (operator === "/") {
     // TODO: Division by zero checks
     result = lhs.value / rhs.value;
   } else {
     result = lhs.value % rhs.value;
   }
 
-  return new IntValue(result);
+  if (operator === ">") {
+    result = lhs.value > rhs.value;
+  } else if (operator === "<") {
+    result = lhs.value < rhs.value;
+  } else if (operator === "==") {
+    result = lhs.value === rhs.value;
+  } else if (operator === "!=") {
+    // TODO: Division by zero checks
+    result = lhs.value !== rhs.value;
+  }
+
+  if ((typeof result) === "number") {
+    return new IntValue(result as number);
+  } else {
+    return new BooleanValue(result as boolean);
+  } 
 }
 
 function evalBinaryExpr(binop: BinaryExpr, env: Environment): RuntimeValue {

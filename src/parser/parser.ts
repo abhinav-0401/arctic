@@ -131,11 +131,29 @@ export class Parser {
   }
 
   parseMultiplicative(): Expr {
-    let left: Expr = this.parsePrimary();
+    let left: Expr = this.parseConditionalExpr();
 
     while (
       this.peek().type === TokenType.Asterisk ||
       this.peek().type === TokenType.Slash
+    ) {
+      const operator: Token = this.advance();
+      const right: Expr = this.parseConditionalExpr();
+
+      left = new BinaryExpr(left, right, operator.literal);
+    }
+
+    return left;
+  }
+
+  parseConditionalExpr(): Expr {
+    let left: Expr = this.parsePrimary();
+
+    while (
+      this.peek().type === TokenType.GreaterThan ||
+      this.peek().type === TokenType.LessThan ||
+      this.peek().type === TokenType.Equal ||
+      this.peek().type === TokenType.NotEqual
     ) {
       const operator: Token = this.advance();
       const right: Expr = this.parsePrimary();
@@ -145,7 +163,6 @@ export class Parser {
 
     return left;
   }
-
 
   parseFunCall(identToken: Token): Expr {
     this.advance();     // we already know that there is a left parenthesis
@@ -209,7 +226,11 @@ export class Parser {
         }
       case TokenType.If:
         return this.parseIfExpr();
-
+      case TokenType.GreaterThan:
+      case TokenType.LessThan:
+      case TokenType.Equal:
+      case TokenType.NotEqual:
+        return this.parseConditionalExpr();
       default:
         console.error("Token not supported by the parser :/", currentToken, this.peek(), this.peekNext());
         process.exit(1);

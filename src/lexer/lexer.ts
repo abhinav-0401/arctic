@@ -68,9 +68,17 @@ export class Lexer {
         token.literal = char;
         break;
       case '!':
-        token.type = TokenType.Bang;
-        token.literal = char;
-        break;
+        switch (this.peek()) {
+          case "=":
+            token.type = TokenType.NotEqual;
+            token.literal = "!=";
+            this.advance();
+            break;
+          default:
+            token.type = TokenType.Bang;
+            token.literal = char;
+            break;
+        }
       case '>':
         token.type = TokenType.GreaterThan;
         token.literal = char;
