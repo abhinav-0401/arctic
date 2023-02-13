@@ -7,12 +7,16 @@ export class Environment {
   private functionValues: Map<string, RuntimeValue>;
   private functions: Map<string, Stmt[]>;
   private functionEnv: Map<string, Environment>;
+  private functionParams: Map<string, string[]>;
+  private functionArgs: Map<string, RuntimeValue[]>;
 
   constructor(parent?: Environment) {
     this.parent = parent;
     this.variables = new Map();
     this.functions = new Map();
     this.functionEnv = new Map();
+    this.functionParams = new Map();
+    this.functionArgs = new Map();
   }
 
   declareVar(varname: string, value: RuntimeValue): RuntimeValue {
@@ -47,12 +51,13 @@ export class Environment {
     return this.parent.resolve(varname);
   }
 
-  declareFun(funName: string, body: Stmt[]) {
+  declareFun(funName: string, params: string[], body: Stmt[]) {
     if (this.functions.has(funName)) {
       throw `Cannot declare function ${funName}. As it already is defined.`;
     }
 
     this.functions.set(funName, body);
+    this.functionParams.set(funName, params);
     // this.functionEnv.set(funName, new Environment());
   }
 
@@ -62,7 +67,13 @@ export class Environment {
   }
 
   lookupFunEnv(funName: string): Environment {
+    // const env: Environment = this.resolveFun(funName)
     return this.functionEnv.get(funName) as Environment;
+  }
+
+  lookupFunParams(funName: string): string[] {
+    const env: Environment = this.resolveFun(funName)
+    return env.functionParams.get(funName) as string[];
   }
 
   setParentEnv(env: Environment): void {

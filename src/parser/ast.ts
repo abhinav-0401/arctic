@@ -57,12 +57,14 @@ export class VarAssignment extends Stmt {
 
 export class FunDeclaration extends Stmt {
   identifier: string;
+  params: string[];
   body: Stmt[];
 
-  constructor(identifier: string, body: Stmt[]) {
+  constructor(identifier: string, params: string[], body: Stmt[]) {
     super("FunDeclaration");
     this.identifier = identifier;
     this.body = body;
+    this.params = params;
   }
 }
 
@@ -125,10 +127,12 @@ export class IntLiteral extends Expr {
 
 export class FunCall extends Expr {
   identifier: string;
+  args: Expr[];
 
-  constructor(identifier: string) {
+  constructor(identifier: string, args: Expr[]) {
     super("FunCall");
     this.identifier = identifier;
+    this.args = args;
   }
 }
 

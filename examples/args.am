@@ -1,0 +1,18 @@
+fun add(a, b) {
+    return a + b;
+}
+
+let a = 19;
+let b = 11;
+
+print add( if (a < b) { 3 } else { 4 }, b);
+
+fun fib(n) {
+    if (n < 2) {
+        return n;
+    }
+
+    return fib(n - 1) + fib(n - 2); 
+}
+
+fib(10)

@@ -106,8 +106,7 @@ function evalValAssignment(node: VarAssignment, env: Environment): RuntimeValue 
 }
 
 function evalFunDeclaration(node: FunDeclaration, env: Environment): RuntimeValue {
-  env.declareFun(node.identifier, node.body);
-
+  env.declareFun(node.identifier, node.params, node.body);
   return new NullValue();
 }
 
@@ -120,6 +119,14 @@ function evalFunCall(node: FunCall, env: Environment): RuntimeValue {
   // set the new environment for the function
   env.setFunEnv(node.identifier, funEnv);
   funEnv.setParentEnv(env);
+
+  // console.log("args: ", node.args);
+  // console.log("params: ", env.lookupFunParams(node.identifier));
+  // console.log("env", env);
+
+  for (let i = 0; i < node.args.length; ++i) {
+    funEnv.declareVar(env.lookupFunParams(node.identifier)[i], evaluate(node.args[i], env));
+  }
 
   let lastEvaluated: RuntimeValue;
   for (const funStmt of funBody) {

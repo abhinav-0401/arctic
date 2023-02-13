@@ -1,15 +1,15 @@
 let i = 0;
 
-let num = 10000;
+#let num = 10000;
 
-fun loop() {
+fun loop(num) {
     if (i > num) {
         return;
     }
 
     print i;
     i = i + 1;
-    loop()
+    loop(10)
 }
 
-loop()
+loop(10)

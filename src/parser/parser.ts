@@ -51,7 +51,7 @@ export class Parser {
 
     const equal: Token = this.expect(TokenType.Assign);
     const valExpr: Expr = this.parseExpr();
-    console.log(valExpr);
+    // console.log(valExpr);
     const semi: Token = this.expect(TokenType.Semicolon);
     return new VarDeclaration(varName, valExpr);
   }
@@ -76,6 +76,7 @@ export class Parser {
     const funName: Token = this.advance();
 
     this.expect(TokenType.LeftParenthesis);
+    const params: string[] = this.parseFunParams();
     this.expect(TokenType.RightParenthesis);
     this.expect(TokenType.LeftBrace);
 
@@ -85,7 +86,7 @@ export class Parser {
     }
     this.advance();   // get past the closing brace
 
-    return new FunDeclaration(funName.literal, body);
+    return new FunDeclaration(funName.literal, params, body);
   }
 
   parsePrint(): Stmt {
@@ -166,14 +167,49 @@ export class Parser {
 
   parseFunCall(identToken: Token): Expr {
     this.advance();     // we already know that there is a left parenthesis
+    const args: Expr[] = this.parseFunArgs();
     this.expect(TokenType.RightParenthesis);
 
-    return new FunCall(identToken.literal);
+    return new FunCall(identToken.literal, args);
+  }
+
+  parseFunArgs(): Expr[] {
+    const args: Expr[] = [];
+
+    while (this.peek().type !== TokenType.Comma && this.peek().type !== TokenType.RightParenthesis) {
+      args.push(this.parseExpr());
+
+      if (this.peek().type === TokenType.Comma) {
+        this.advance();
+        continue;
+      } else if (this.peek().type === TokenType.RightParenthesis) {
+        break;
+      }
+    }
+
+    return args;
+  }
+
+  parseFunParams(): string[] {
+    const params: string[] = [];
+
+    while (this.peek().type !== TokenType.Comma && this.peek().type !== TokenType.RightParenthesis) {
+      params.push((this.parseExpr() as Identifier).symbol);
+
+      if (this.peek().type === TokenType.Comma) {
+        this.advance();
+        continue;
+      } else if (this.peek().type === TokenType.RightParenthesis) {
+        break;
+      }
+    }
+
+    return params;
   }
 
   parseIfExpr(): Expr {
     this.expect(TokenType.LeftParenthesis);
-    console.log("inside if expr");
+    // console.log("inside if expr");
 
     const condition: Expr = this.parseExpr();
     if (!condition) { throw "An if expression must have a condition within parenthesis"; }
@@ -188,7 +224,7 @@ export class Parser {
       ifBlock.push(this.parseStmt());
     }
     this.advance();
-    console.log(this.peek());
+    // console.log(this.peek());
 
     if (this.peek().type === TokenType.Else) {
       this.advance();

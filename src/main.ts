@@ -33,14 +33,14 @@ function runFile(filename: string): void {
   // Lexer.printTokens(tokens);
   const parser = new Parser(tokens);
   const ast = parser.produceAST();
-  console.log(ast.body);
+  // console.log(ast.body);
 
   const globalEnv = new Environment();
   globalEnv.declareVar("bday", new IntValue(4));
   globalEnv.declareVar("true", new BooleanValue(true));
   globalEnv.declareVar("false", new BooleanValue(false));
   globalEnv.declareVar("null", new NullValue());
-  globalEnv.declareVar("x", new IntValue(10));
+  // globalEnv.declareVar("x", new IntValue(10));
 
   console.log("Program returned", evaluate(ast, globalEnv));
 }
